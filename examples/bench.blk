@@ -1,0 +1,35 @@
+(define for-loop
+  (lambda (start end thunk)
+    (if (= end start) 'done
+        (begin
+          (thunk start)
+          (for-loop (+ start 1) end thunk)))))
+
+(define bench
+  (lambda (t)
+    (let ((start-time (real-time)))
+      (for-loop 0 10000 (lambda (i) (t)))
+      (let ((end-time (real-time)))
+        (- end-time start-time)))))
+
+(define fac (lambda (n) (if (= n 0) 1 (* n (fac (- n 1))))))
+
+(EM (define counter 0))
+(EM (define old-eval-var eval-var))
+(EM (define trace-eval-var (lambda (e r k) (if (eq? e 'n) (set! counter (+ counter 1)) 0) (old-eval-var e r k))))
+
+(define one-step
+  (lambda (i)
+    (display i)
+    (display ",")
+    (display (bench (lambda () (fac i))))
+    (display ",")
+    (EM (set! counter 0))
+    (EM (set! eval-var trace-eval-var))
+    (display (bench (lambda () (fac i))))
+    (EM (set! eval-var old-eval-var))
+    (display "\n")))
+
+(begin
+  (display "fac #,evaluated,traced evaluated\n")
+  (for-loop 0 10 one-step))
