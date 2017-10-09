@@ -280,6 +280,8 @@
 	     (cons (filter (car arg))
 		   (filter (cdr arg)))))
       arg))
+(define (primitive-real-time . args)
+  (real-time))
 (define (primitive-display . args)
   (display (filter (car args))))
 (define (primitive-write . args)
@@ -355,6 +357,7 @@
 	append
 	primitive-write primitive-pp primitive-display newline read
 	primitive-print primitive-procedure?
+  primitive-real-time
 	+ - * / = < > quotient remainder number?
 	boolean? string? symbol? assq member length force
 	open-input-file close-input-port eof-object?
@@ -455,6 +458,7 @@
   (cons 'primitive-procedures	primitive-procedures)
   (cons 'old-env		old-env)
   (cons 'old-cont		old-cont)
+  (cons 'real-time primitive-real-time)
 )))
 ;
 ; Meta-level Initial Continuation
