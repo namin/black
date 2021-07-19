@@ -1,0 +1,4 @@
+(EM (define re-enter #f))
+((delta (e r k) (set! re-enter k)))
+
+
