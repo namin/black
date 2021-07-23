@@ -11,18 +11,59 @@
 
 (define eval-jit-trace
   (lambda (exp env cont)
-    (let ((original-eval-application eval-application)
+    (let ((original-base-eval base-eval)
+          (original-eval-application eval-application)
           (original-eval-set! eval-set!)
           (original-eval-if eval-if)
-          (trace '()))
+          (trace '())
+          (count 0)
+          (stack '()))
       (define (add-trace! exp)
         (set! trace (cons exp trace)))
+      (define (gen-id!)
+        (let ((id count))
+          (set! count (+ 1 count))
+          (list 'a id)))
+      (define (anf-in! exp)
+        (if (null? exp)
+            '()
+            (cons (pop-stack!) (anf-in! (cdr exp)))))
+      (define (anf! exp)
+        (cons (car exp) (anf-in! (cdr exp))))
+      (define (pop-stack!)
+        (let ((exp (car stack)))
+          (set! stack (cdr stack))
+          exp))
+      (define (push-stack-entry! e)
+        (set! stack (cons e stack)))
+      (define (push-stack! exp v)
+        (push-stack-entry!
+         (if (pair? exp)
+             (let ((id (gen-id!)))
+               (add-trace! (list 'define id exp))
+               id)
+             exp)))
+      (set! base-eval
+        (lambda (exp env cont)
+          (original-base-eval
+           exp env
+           (lambda (v)
+             (if (not (pair? exp))
+                 (push-stack! exp v))
+             (cont v)))))
+      (set! eval-application
+        (lambda (exp env cont)
+          (original-eval-application
+           exp env
+           (lambda (v)
+             (push-stack! exp v)
+             (cont v)))))
       (set! eval-set!
         (lambda (exp env cont)
           (original-eval-set!
            exp env
            (lambda (v)
-             (add-trace! exp)
+             (add-trace! (list 'set! (car (cdr exp)) (pop-stack!)))
              (cont v)))))
       (set! eval-if
         (lambda (exp env cont)
@@ -44,6 +85,7 @@
       (base-eval
        exp env
        (lambda (ans)
+         (set! base-eval original-base-eval)
          (set! eval-application original-eval-application)
          (set! eval-set! original-eval-set!)
          (set! eval-if original-eval-if)
