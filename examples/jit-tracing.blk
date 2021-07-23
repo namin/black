@@ -1,0 +1,50 @@
+(define (reverse-iter xs ys)
+  (if (null? xs)
+      ys
+      (reverse-iter (cdr xs) (cons (car xs) ys))))
+
+(define (reverse xs)
+  (reverse-iter xs '()))
+
+(define (form-trace trace)
+  (cons 'begin (reverse trace)))
+
+(define eval-jit-trace
+  (lambda (exp env cont)
+    (let ((original-eval-application eval-application)
+          (original-eval-set! eval-set!)
+          (original-eval-if eval-if)
+          (trace '()))
+      (set! eval-set!
+        (lambda (exp env cont)
+          (set! trace (cons exp trace))
+          (original-eval-set! exp env cont)))
+      (set! eval-if
+        (lambda (exp env cont)
+          (let ((pred-part (car (cdr exp)))
+                (then-part (car (cdr (cdr exp))))
+                (else-part (cdr (cdr (cdr exp)))))
+            (base-eval
+             pred-part env
+             (lambda (p)
+               (if p
+                   (begin
+                     (set! trace (cons (list 'speculate pred-part) trace))
+                     (base-eval then-part env cont))
+                   (begin
+                     (set! trace (cons (list 'speculate (list 'not pred-part)) trace))
+                     (if (null? else-part)
+                         (cont #f)
+                         (base-eval (car else-part) env cont)))))))))
+      (base-eval
+       exp env
+       (lambda (ans)
+         (set! eval-application original-eval-application)
+         (set! eval-set! original-eval-set!)
+         (set! eval-if original-eval-if)
+         (cont (form-trace trace)))))))
+
+(add-app-hook!
+ 'jit-trace
+ (lambda (exp env cont)
+   ((eval-jit-trace (car (cdr exp)) env cont))))

@@ -1,0 +1,29 @@
+(define (if-instr-pred exp)
+  (car (cdr (cdr (cdr exp)))))
+
+(define (if-instr-then exp)
+  (car (cdr (cdr (cdr (cdr exp))))))
+
+(define (if-instr-else exp)
+  (car (cdr (cdr (cdr (cdr (cdr exp)))))))
+
+(define (if-instr-update! p exp)
+  (let ((c (if p (cdr exp) (cdr (cdr exp)))))
+    (set-car! c (+ 1 (car c)))))
+
+(define (eval-if-instr exp env cont)
+  (base-eval
+   (if-instr-pred exp) env
+   (lambda (p)
+     (if-instr-update! p exp)
+     (if p
+         (base-eval (if-instr-then exp) env cont)
+         (base-eval (if-instr-else exp) env cont)))))
+
+(define original-eval-application eval-application)
+(set! eval-application
+  (lambda (exp env cont)
+    (cond ((eq? (car exp) 'if-instr)
+           (eval-if-instr exp env cont))
+          (else
+           (original-eval-application exp env cont)))))

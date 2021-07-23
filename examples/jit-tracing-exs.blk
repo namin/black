@@ -1,0 +1,12 @@
+(EM (load "examples/utils.blk"))
+(EM (load "examples/jit-tracing.blk"))
+(define x 3)
+(jit-trace (begin (if (> x 3) (set! x 3) (set! x 0))))
+(set! x 4)
+(define (foo)
+  (if (< x 0)
+      (set! x 0)
+      (begin
+        (set! x (- x 1))
+        (foo))))
+(jit-trace (foo))

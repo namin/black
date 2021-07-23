@@ -1,0 +1,4 @@
+(define (factorial n)
+  (if-instr 0 0 (= n 0)
+      1
+      (* n (factorial (- n 1)))))
