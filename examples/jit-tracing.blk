@@ -15,12 +15,14 @@
           (original-eval-set! eval-set!)
           (original-eval-if eval-if)
           (trace '()))
+      (define (add-trace! exp)
+        (set! trace (cons exp trace)))
       (set! eval-set!
         (lambda (exp env cont)
           (original-eval-set!
            exp env
            (lambda (v)
-             (set! trace (cons exp trace))
+             (add-trace! exp)
              (cont v)))))
       (set! eval-if
         (lambda (exp env cont)
@@ -32,10 +34,10 @@
              (lambda (p)
                (if p
                    (begin
-                     (set! trace (cons (list 'speculate pred-part) trace))
+                     (add-trace! (list 'speculate pred-part))
                      (base-eval then-part env cont))
                    (begin
-                     (set! trace (cons (list 'speculate (list 'not pred-part)) trace))
+                     (add-trace! (list 'speculate (list 'not pred-part)))
                      (if (null? else-part)
                          (cont #f)
                          (base-eval (car else-part) env cont)))))))))
