@@ -2,6 +2,7 @@
 (EM (load "examples/jit-tracing.blk"))
 (define x 2)
 (jit-trace (+ 1 (if (> x 4) 2 3)))
+(jit-trace (+ 1 (if (> x 4) 2 (if (< x 2) 5 3))))
 (define x 3)
 (jit-trace (begin (if (> x 3) (set! x 3) (set! x 0))))
 (set! x 4)
