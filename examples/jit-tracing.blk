@@ -66,6 +66,7 @@
            exp env
            (lambda (v)
              (add-trace! (list 'set! (car (cdr exp)) (pop-stack!)))
+             (push-stack-entry! 'undefined)
              (cont v)))))
       (set! eval-if
         (lambda (exp env cont)
@@ -91,6 +92,7 @@
          (set! eval-application original-eval-application)
          (set! eval-set! original-eval-set!)
          (set! eval-if original-eval-if)
+         (add-trace! (pop-stack!))
          (cont (form-trace trace)))))))
 
 (add-app-hook!
