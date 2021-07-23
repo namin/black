@@ -9,6 +9,9 @@
 (define (form-trace trace)
   (cons 'begin (reverse trace)))
 
+(define (lambda? op)
+  (and (pair? op) (eq? lambda-tag (car op))))
+
 (define eval-jit-trace
   (lambda (exp env cont)
     (let ((original-base-eval base-eval)
@@ -59,8 +62,10 @@
           (original-eval-application
            exp env
            (lambda (ov)
-             (let ((v (car (cdr ov))))
-               (push-stack! exp v)
+             (let ((o (car ov))
+                   (v (car (cdr ov))))
+               (if (not (lambda? o))
+                   (push-stack! exp v))
                (cont v))))))
       (set! base-apply
         (lambda (operator operand env cont)
