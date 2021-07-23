@@ -17,8 +17,11 @@
           (trace '()))
       (set! eval-set!
         (lambda (exp env cont)
-          (set! trace (cons exp trace))
-          (original-eval-set! exp env cont)))
+          (original-eval-set!
+           exp env
+           (lambda (v)
+             (set! trace (cons exp trace))
+             (cont v)))))
       (set! eval-if
         (lambda (exp env cont)
           (let ((pred-part (car (cdr exp)))
