@@ -29,7 +29,9 @@
             '()
             (cons (pop-stack!) (anf-in! (cdr exp)))))
       (define (anf! exp)
-        (cons (car exp) (anf-in! (cdr exp))))
+        (let ((r (cons (car exp) (reverse (anf-in! (cdr exp))))))
+          (pop-stack!)
+          r))
       (define (pop-stack!)
         (let ((exp (car stack)))
           (set! stack (cdr stack))
@@ -40,7 +42,7 @@
         (push-stack-entry!
          (if (pair? exp)
              (let ((id (gen-id!)))
-               (add-trace! (list 'define id exp))
+               (add-trace! (list 'define id (anf! exp)))
                id)
              exp)))
       (set! base-eval
@@ -75,10 +77,10 @@
              (lambda (p)
                (if p
                    (begin
-                     (add-trace! (list 'speculate pred-part))
+                     (add-trace! (list 'speculate (pop-stack!)))
                      (base-eval then-part env cont))
                    (begin
-                     (add-trace! (list 'speculate (list 'not pred-part)))
+                     (add-trace! (list 'speculate (list 'not (pop-stack!))))
                      (if (null? else-part)
                          (cont #f)
                          (base-eval (car else-part) env cont)))))))))
