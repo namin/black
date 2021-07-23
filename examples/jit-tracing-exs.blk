@@ -13,3 +13,9 @@
         (set! x (- x 1))
         (foo))))
 (jit-trace (foo))
+(define (bar x)
+  (if (< x 0)
+      0
+      (+ 2 (bar (- x 1)))))
+;; does not work
+(jit-trace (bar 0))
