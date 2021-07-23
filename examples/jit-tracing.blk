@@ -13,6 +13,7 @@
   (lambda (exp env cont)
     (let ((original-base-eval base-eval)
           (original-eval-application eval-application)
+          (original-base-apply base-apply)
           (original-eval-set! eval-set!)
           (original-eval-if eval-if)
           (trace '())
@@ -57,9 +58,16 @@
         (lambda (exp env cont)
           (original-eval-application
            exp env
+           (lambda (ov)
+             (let ((v (car (cdr ov))))
+               (push-stack! exp v)
+               (cont v))))))
+      (set! base-apply
+        (lambda (operator operand env cont)
+          (original-base-apply
+           operator operand env
            (lambda (v)
-             (push-stack! exp v)
-             (cont v)))))
+             (cont (list operator v))))))
       (set! eval-set!
         (lambda (exp env cont)
           (original-eval-set!
@@ -90,6 +98,7 @@
        (lambda (ans)
          (set! base-eval original-base-eval)
          (set! eval-application original-eval-application)
+         (set! base-apply original-base-apply)
          (set! eval-set! original-eval-set!)
          (set! eval-if original-eval-if)
          (add-trace! (pop-stack!))
