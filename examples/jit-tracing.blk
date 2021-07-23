@@ -23,6 +23,8 @@
           (count 0)
           (stack '()))
       (define (add-trace! exp)
+        (display (list 'trace exp))
+        (newline)
         (set! trace (cons exp trace)))
       (define (gen-id!)
         (let ((id count))
@@ -41,6 +43,7 @@
           (set! stack (cdr stack))
           exp))
       (define (push-stack-entry! e)
+        (display (list 'stack 'push e stack))
         (set! stack (cons e stack)))
       (define (push-stack! exp v)
         (push-stack-entry!
@@ -66,7 +69,12 @@
                    (v (car (cdr ov))))
                (if (not (lambda? o))
                    (push-stack! exp v)
-                   (anf! exp))
+                   (begin
+                     (display (list 'stack 'before stack))
+                     (newline)
+                     (anf! exp)
+                     (display (list 'stack 'after stack))
+                     (newline)))
                (cont v))))))
       (set! base-apply
         (lambda (operator operand env cont)
