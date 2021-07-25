@@ -1,0 +1,18 @@
+;; at user level
+(begin
+  (EM (define re-enter #f))
+  ((delta (e r k) (set! re-enter k))))
+
+;; at each meta-level
+(begin
+  (EM (define re-enter #f))
+  ((delta (e r k)
+     (set! re-enter
+       (lambda (v)
+         (base-eval
+          're-enter r
+          (lambda (re-enter)
+            (begin
+              (re-enter v)
+              ;; problem: stop is swallowed
+              (k v)))))))))
