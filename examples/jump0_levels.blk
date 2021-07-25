@@ -1,7 +1,12 @@
+(EM (load "cont.blk"))
+
 ;; at user level
 (begin
+  (define jump #f)
   (EM (define re-enter #f))
-  ((delta (e r k) (set! re-enter k))))
+  ((delta (e r k)
+     (set! re-enter k)
+     (base-eval '(set! jump (EM (jumpify re-enter))) r (lambda (x) x)))))
 
 ;; at each meta-level
 (begin
@@ -14,4 +19,4 @@
           (lambda (re-enter)
             (k (re-enter v)))))))))
 
-;; old-cont is broken!
+;; old-cont is broken after a deep reset!

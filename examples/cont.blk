@@ -1,0 +1,11 @@
+;; adapted from Blond
+(define jumpify
+  (lambda (pc)
+    (lambda (a)
+       ((delta (e r k)
+          (base-eval
+           'a r
+           (lambda (v)
+             (base-eval
+              'pc r
+              (lambda (pc) (pc v))))))))))
