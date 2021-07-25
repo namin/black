@@ -12,7 +12,6 @@
          (base-eval
           're-enter r
           (lambda (re-enter)
-            (begin
-              (re-enter v)
-              ;; problem: stop is swallowed
-              (k v)))))))))
+            (k (re-enter v)))))))))
+
+;; old-cont is broken!
