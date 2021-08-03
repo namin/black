@@ -28,7 +28,8 @@
                   (list 'set! (car (car undo-list)) (list 'quote (cdr (car undo-list))))
                   r
                   (lambda (v) v))
-                 (set! undo-list (cdr undo-list))))))
+                 (set! undo-list (cdr undo-list))
+                 'done))))
        )))
 
 (EM
