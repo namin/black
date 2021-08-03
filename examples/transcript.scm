@@ -57,7 +57,7 @@ base-eval
 ;; http://www.brics.dk/RS/02/12/BRICS-RS-02-12.pdf (ICFP pearl)
 ;; http://brics.dk/RS/05/3/BRICS-RS-05-3.pdf (extended journal version)
 
-(EM (load "examples/taba.blk"))
+(EM (load "examples/taba1.blk"))
 ;; or
 (EM (load "examples/taba2.blk"))
 ;; or
@@ -65,7 +65,7 @@ base-eval
 (EM (load "examples/taba3.blk"))
 
 (load "examples/cnv.scm")
-(taba (cnv3 walk) (cnv3 '(1 2 3) '(a b c)))
+(taba (cnv walk) (cnv '(1 2 3) '(a b c)))
 
 (load "examples/pal.scm")
 (taba (pal_c walk) (pal_c '(1 2 2 1)))
