@@ -105,7 +105,9 @@
                    (begin
                      (add-trace! (list 'speculate (list 'not (pop-stack!))))
                      (if (null? else-part)
-                         (cont #f)
+                         (begin
+                           (push-stack-entry! #f)
+                           (cont #f))
                          (base-eval (car else-part) env cont)))))))))
       (base-eval
        exp env
