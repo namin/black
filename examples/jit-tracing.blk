@@ -19,6 +19,7 @@
           (original-base-apply base-apply)
           (original-eval-set! eval-set!)
           (original-eval-if eval-if)
+          (original-eval-begin eval-begin)
           (trace '())
           (count 0)
           (stack '()))
@@ -109,6 +110,16 @@
                            (push-stack-entry! #f)
                            (cont #f))
                          (base-eval (car else-part) env cont)))))))))
+      (set! eval-begin
+        (lambda (body env cont)
+          (define (eval-begin-local body)
+            (if (null? (cdr body))
+	        (base-eval (car body) env cont)
+	        (base-eval (car body) env
+		           (lambda (x)
+                             (pop-stack!)
+                              (eval-begin-local (cdr body))))))
+          (eval-begin-local body)))
       (base-eval
        exp env
        (lambda (ans)
@@ -117,6 +128,7 @@
          (set! base-apply original-base-apply)
          (set! eval-set! original-eval-set!)
          (set! eval-if original-eval-if)
+         (set! eval-begin original-eval-begin)
          (add-trace! (pop-stack!))
          (display stack)
          (newline)
