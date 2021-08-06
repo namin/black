@@ -17,7 +17,12 @@
 (jit-trace (foo))
 (define (bar x)
   (if (< x 0)
-      0
+      10
       (+ 2 (bar (- x 1)))))
 ;; does not work
 (jit-trace (bar 0))
+;; TODO: need to do or
+(define (bar x)
+  (if (or (= x 0) (< x 0))
+      0
+      (+ 2 (bar (- x 1)))))
