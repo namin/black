@@ -1,0 +1,8 @@
+(EM (load "examples/fexpr.blk"))
+(+ 1 2)
+(fexpr (x) x)
+(fexpr lambda (x) x)
+((fexpr (x) x) 1)
+((fexpr (x) x) (+ 1 2))
+(define eval (lambda (exp) (base-eval exp empty-env (lambda (x) x))))
+((fexpr (a b c) (if (eval a) (eval b) (eval c))) #t 1 bad)

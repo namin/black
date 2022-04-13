@@ -1,0 +1,14 @@
+(set! eval-application
+  (lambda (exp env cont)
+    (cond
+      ((eq? (car exp) 'fexpr)
+       (base-eval (cons 'lambda (cdr exp)) env (lambda (clo) (cont (cons 'fexpr clo)))))
+      (else
+       (base-eval
+        (car exp) env
+        (lambda (op)
+          (cond
+            ((and (pair? op) (eq? 'fexpr (car op)))
+             (base-apply (cdr op) (cdr exp) env cont))
+            (else
+             (eval-list (cdr exp) env (lambda (l) (base-apply op l env cont)))))))))))
