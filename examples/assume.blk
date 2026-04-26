@@ -1,0 +1,45 @@
+;;; assume.blk — havoc; assume(spec); install for Black
+;;;
+;;; Load at the meta-level: (exec-at-metalevel (load "examples/assume.blk"))
+;;;
+;;; Provides modify-base-apply! which checks that a proposed
+;;; modification's guard is disjoint from all cases where the
+;;; original base-apply succeeds. This is the conservative
+;;; extension check: if the guard only fires on values the
+;;; original can't handle, old behavior is preserved.
+
+;; Witnesses: representative values for each case where
+;; base-apply currently succeeds.
+;;   - A host procedure (procedure? is #t)
+;;   - A closure (lambda-tag-headed list)
+(define apply-witnesses
+  (list +
+        (list lambda-tag '(x) '(x) '())))
+
+;; Check that a guard is disjoint from all success cases
+(define (disjoint-guard? guard)
+  (define (check ws)
+    (cond ((null? ws) #t)
+          ((guard (car ws))
+           (display "  CONFLICT: guard fires on existing case\n")
+           #f)
+          (else (check (cdr ws)))))
+  (check apply-witnesses))
+
+;; modify-base-apply!: the assume(spec) gate
+;;   guard:   (value -> bool)  — when does new behavior apply?
+;;   handler: (operator operand env cont -> ...) — the new behavior
+;;
+;; Checks disjointness, then wraps base-apply with the new case.
+;; The else branch always delegates to the original — conservative
+;; extension is structural, not tested.
+(define (modify-base-apply! guard handler)
+  (if (disjoint-guard? guard)
+      (let ((original base-apply))
+        (set! base-apply
+          (lambda (operator operand env cont)
+            (if (guard operator)
+                (handler operator operand env cont)
+                (original operator operand env cont))))
+        (display "INSTALLED (guard is disjoint)\n"))
+      (display "REJECTED (guard overlaps)\n")))

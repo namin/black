@@ -1,0 +1,15 @@
+;;; bad-checked.blk — a bad modification, rejected by the gate
+;;;
+;;; This modification would break existing behavior: it claims
+;;; to handle ALL operators, which overlaps with procedures
+;;; and closures. The gate rejects it.
+;;;
+;;; Usage (from Black REPL):
+;;;   (exec-at-metalevel (load "examples/assume.blk"))
+;;;   (exec-at-metalevel (load "examples/bad-checked.blk"))
+;;;   => "REJECTED (guard overlaps)"
+
+(modify-base-apply!
+  (lambda (x) #t)
+  (lambda (operator operand env cont)
+    (meta-apply cont 42)))

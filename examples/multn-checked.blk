@@ -1,0 +1,12 @@
+;;; multn-checked.blk — multn through the assume(spec) gate
+;;;
+;;; Usage (from Black REPL):
+;;;   (exec-at-metalevel (load "examples/assume.blk"))
+;;;   (exec-at-metalevel (load "examples/multn-checked.blk"))
+;;;   (2 3 4)    => 24
+;;;   (+ 1 2)    => 3   (old behavior preserved)
+
+(modify-base-apply!
+  number?
+  (lambda (operator operand env cont)
+    (base-eval (cons '* (cons operator operand)) env cont)))
