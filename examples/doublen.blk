@@ -1,0 +1,9 @@
+(let ((original-base-apply base-apply))
+  (set! base-apply
+        (lambda (operator operand env cont)
+          (original-base-apply
+           operator operand env
+           (lambda (v)
+             (if (number? v)
+                 (cont (* 2 v))
+                 (cont v)))))))
